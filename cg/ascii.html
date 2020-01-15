@@ -54,16 +54,36 @@
         top: 0;
         z-index: 99;
         font-family: monospace;
+        display: flex !important;
+        flex-direction: row;
       }
       div#enter {
         padding: 0.3rem 1rem;
         box-shadow: inset -1px 0px 14px 0px darkgreen, 0 0 10px 2px #4caf50;
         border-radius: 3px;
         margin: 0px 10px;
+        cursor: pointer;
+        font-size: 8vw;
+        color: white;
+        font-family: monospace;
+        font-weight: normal;
+        text-align: center;
       }
       .inpt > * {
         position: relative;
         transform: scale(2);
+      }
+      input[type="number"] {
+        padding: 0.2rem;
+        margin: 5px 10px;
+        width: 80px;
+        outline: none;
+        border: none;
+      }
+      @media (max-width: 1000px) {
+        .options {
+          flex-direction: column;
+        }
       }
     </style>
     <div class="options">
@@ -91,11 +111,11 @@
           <input type="number" id="width" onchange="change(this)" />
         </div>
       </div>
+    </div>
+    <div class="final">
       <div class="rmm btn" id="enter" onclick="enter(this)">
         Enter The Matrix
       </div>
-    </div>
-    <div class="final">
       <div class="cen">
         <pre id="fin"></pre>
       </div>
@@ -108,8 +128,8 @@
       bc: "black",
       fc: "darkgreen",
       zoom: 1,
-      width: 360,
-      height: 640
+      width: 800,
+      height: 600 * 0.5
     };
     function componentToHex(c) {
       var hex = c.toString(16);
