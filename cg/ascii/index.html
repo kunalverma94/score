@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body>
+    <style>
+      html,
+      body,
+      .final {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+      .final {
+        font-size: 1px;
+        background: black;
+        color: green;
+        user-select: none;
+        display: flex;
+        justify-content: center;
+        align-content: center;
+        align-items: center;
+        transition: 0.5s;
+      }
+    </style>
+    <div class="flex">
+      <div class="source" style="display: none;">
+        <video autoplay height="480" width="640" style="display: none;"></video>
+      </div>
+      <div class="orignal">
+        <canvas
+          id="org"
+          height="480"
+          width="640"
+          style="display: none;"
+        ></canvas>
+      </div>
+    </div>
+    <div class="final">
+      <div class="cen">
+        <pre id="fin"></pre>
+      </div>
+    </div>
+  </body>
+  <script>
+    function componentToHex(c) {
+      var hex = c.toString(16);
+      return hex.length == 1 ? "0" + hex : hex;
+    }
+    const cg = {
+      clone: () => {
+        c.drawImage(document.querySelector("video"), 0, 0, 640, 480);
+        cg.eff();
+        requestAnimationFrame(cg.clone);
+      },
+      eff: () => {
+        cg.bw();
+      },
+      bw: () => {
+        let id = c.getImageData(0, 0, 640, 480);
+        var data = id.data;
+        let s = "";
+        let h = 0;
+        let w = 0;
+        for (let i = 0; i < id.data.length; ) {
+          w++;
+          if (w >= 640) {
+            s = s += "\n";
+            w = 0;
+            h++;
+            if (h >= 480) {
+              break;
+            }
+          }
+          s += componentToHex(data[i])[0];
+          i += 4;
+        }
+        document.getElementById("fin").innerHTML = s;
+      }
+    };
+    const z = document.getElementsByClassName("final")[0];
+    const eel = document.getElementById("fin");
+    const opt = {
+      bc: "",
+      fc: "",
+      zoom: 1
+    };
+    const zoomin = () => {
+      opt.zoom += 0.5;
+      z.style.transform = `scale(${opt.zoom})`;
+    };
+    const zoomout = () => {
+      if (opt.zoom <= 1) return;
+      opt.zoom -= 0.5;
+      z.style.transform = `scale(${opt.zoom})`;
+    };
+    eel.onclick = function(e) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+      zoomin();
+    };
+
+    eel.oncontextmenu = function(e) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+      zoomout();
+    };
+    var init = function() {
+      cg.clone();
+    };
+    document.onwheel = function(e) {
+      console.log(e);
+      if (e.deltaY < 0) {
+        zoomin();
+      } else {
+        zoomout();
+      }
+    };
+    navigator.getUserMedia(
+      { video: { height: 480, width: 640, facingMode: "user" } },
+      d => {
+        document.querySelector("video").srcObject = d;
+        init();
+      },
+      d => console.log(d)
+    );
+    const c = document.querySelector("canvas").getContext("2d");
+  </script>
+</html>
