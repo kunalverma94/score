@@ -19,7 +19,7 @@
       .final {
         font-size: 1px;
         background: black;
-        color: green;
+        color: darkgreen;
         user-select: none;
         display: flex;
         justify-content: center;
@@ -27,18 +27,72 @@
         align-items: center;
         transition: 0.5s;
       }
+      .options,
+      .options > div {
+        display: flex;
+        align-items: center;
+        color: white;
+        background: black;
+        outline: none;
+        border: none;
+        padding: 2px;
+      }
+
+      .inpt {
+        height: 20px;
+        width: 20px;
+        overflow: hidden;
+        position: relative;
+        border-radius: 50%;
+        margin: 5px;
+        border: solid 1px darkgreen;
+        box-shadow: 0px 0px 10px 0px darkgreen;
+      }
+      .options {
+        position: absolute;
+        padding: 0.5rem;
+        top: 0;
+        z-index: 99;
+        font-family: monospace;
+      }
+      div#enter {
+        padding: 0.3rem 1rem;
+        box-shadow: inset -1px 0px 14px 0px darkgreen, 0 0 10px 2px #4caf50;
+        border-radius: 3px;
+        margin: 0px 10px;
+      }
+      .inpt > * {
+        position: relative;
+        transform: scale(2);
+      }
     </style>
-    <div class="flex">
-      <div class="source" style="display: none;">
-        <video autoplay height="480" width="640" style="display: none;"></video>
+    <div class="options">
+      <div class="para">
+        <div class="label">BG</div>
+        <div class="inpt">
+          <input type="color" name="" id="bc" onchange="change(this)" />
+        </div>
       </div>
-      <div class="orignal">
-        <canvas
-          id="org"
-          height="480"
-          width="640"
-          style="display: none;"
-        ></canvas>
+      <div class="para">
+        <div class="label">FC</div>
+        <div class="inpt">
+          <input type="color" name="" id="fc" onchange="change(this)" />
+        </div>
+      </div>
+      <div class="rmm para">
+        <div class="label">Height</div>
+        <div class="txt">
+          <input type="number" id="height" onchange="change(this)" />
+        </div>
+      </div>
+      <div class="rmm para">
+        <div class="label">Width</div>
+        <div class="txt">
+          <input type="number" id="width" onchange="change(this)" />
+        </div>
+      </div>
+      <div class="rmm btn" id="enter" onclick="enter(this)">
+        Enter The Matrix
       </div>
     </div>
     <div class="final">
@@ -46,15 +100,30 @@
         <pre id="fin"></pre>
       </div>
     </div>
+    <video autoplay style="display: none;"></video>
+    <canvas id="org" style="display: none;"></canvas>
   </body>
   <script>
+    const opt = {
+      bc: "black",
+      fc: "darkgreen",
+      zoom: 1,
+      width: 360,
+      height: 640
+    };
     function componentToHex(c) {
       var hex = c.toString(16);
       return hex.length == 1 ? "0" + hex : hex;
     }
     const cg = {
       clone: () => {
-        c.drawImage(document.querySelector("video"), 0, 0, 640, 480);
+        c.drawImage(
+          document.querySelector("video"),
+          0,
+          0,
+          opt.width,
+          opt.height
+        );
         cg.eff();
         requestAnimationFrame(cg.clone);
       },
@@ -62,34 +131,41 @@
         cg.bw();
       },
       bw: () => {
-        let id = c.getImageData(0, 0, 640, 480);
+        let id = c.getImageData(0, 0, opt.width, opt.height);
         var data = id.data;
         let s = "";
         let h = 0;
         let w = 0;
         for (let i = 0; i < id.data.length; ) {
-          w++;
-          if (w >= 640) {
+          if (w >= opt.width) {
             s = s += "\n";
             w = 0;
             h++;
-            if (h >= 480) {
-              break;
-            }
           }
+          w++;
           s += componentToHex(data[i])[0];
           i += 4;
         }
-        document.getElementById("fin").innerHTML = s;
+        document.getElementById("fin").innerText = s;
       }
     };
     const z = document.getElementsByClassName("final")[0];
     const eel = document.getElementById("fin");
-    const opt = {
-      bc: "",
-      fc: "",
-      zoom: 1
-    };
+    function change(e) {
+      opt[e.id] = e.value;
+      switch (e.id) {
+        case "bc":
+          document.querySelector(".final").style.background = e.value;
+          break;
+        case "fc":
+          document.querySelector(".final").style.color = e.value;
+          break;
+
+        default:
+          break;
+      }
+      console.log(e);
+    }
     const zoomin = () => {
       opt.zoom += 0.5;
       z.style.transform = `scale(${opt.zoom})`;
@@ -123,14 +199,29 @@
         zoomout();
       }
     };
-    navigator.getUserMedia(
-      { video: { height: 480, width: 640, facingMode: "user" } },
-      d => {
-        document.querySelector("video").srcObject = d;
-        init();
-      },
-      d => console.log(d)
-    );
     const c = document.querySelector("canvas").getContext("2d");
+    function enter() {
+      document.querySelectorAll(".rmm").forEach(h => h.remove());
+      navigator.getUserMedia(
+        { video: { height: opt.height, width: opt.width, facingMode: "user" } },
+        d => {
+          document.querySelector("video").srcObject = d;
+          init();
+        },
+        d => console.log(d)
+      );
+    }
+    function inst() {
+      let v = document.querySelector("video");
+      let c = document.querySelector("canvas");
+      v.width = opt.width;
+      v.height = opt.height;
+      c.width = opt.width;
+      c.height = opt.height;
+      document.querySelector("#height").value = opt.height;
+      document.querySelector("#fc").value = "#006400";
+      document.querySelector("#width").value = opt.width;
+    }
+    inst();
   </script>
 </html>
